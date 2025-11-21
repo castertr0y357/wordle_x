@@ -369,6 +369,3 @@ async def complete_game(game_data: GameComplete, user_id: str = Depends(get_curr
     )
     
     return {"message": "Game completed successfully", "stats": stats_dict}
-
-
-from uuid import uuid4
