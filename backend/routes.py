@@ -3,7 +3,8 @@ from motor.motor_asyncio import AsyncIOMotorDatabase
 from models import (
     UserCreate, UserLogin, User, UserInDB, UserProfile, UserStats,
     UpdateDisplayName, ChangePassword, AuthResponse,
-    GameSession, GameSessionCreate, GameSessionUpdate, GameComplete
+    GameSession, GameSessionCreate, GameSessionUpdate, GameComplete,
+    UserPreferences, UpdatePreferences
 )
 from auth import (
     get_password_hash, verify_password, create_access_token,
