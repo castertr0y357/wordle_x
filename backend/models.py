@@ -97,7 +97,7 @@ class GameComplete(BaseModel):
 # Preferences Models
 class UserPreferences(BaseModel):
     user_id: str
-    preferred_word_lengths: List[int] = Field(default_factory=lambda: [5, 6, 7, 8])
+    preferred_word_lengths: List[int] = Field(default_factory=lambda: [5])
 
 
 class UpdatePreferences(BaseModel):

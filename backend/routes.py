@@ -39,6 +39,15 @@ async def signup(user_data: UserCreate):
             detail="Email already registered"
         )
     
+    # Check if display name is taken
+    if user_data.display_name:
+        existing_display_name = await db.users.find_one({"display_name": user_data.display_name})
+        if existing_display_name:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Display name already taken"
+            )
+    
     # Create user
     user_dict = {
         "id": str(uuid4()),
@@ -151,6 +160,14 @@ async def get_profile(user_id: str = Depends(get_current_user_id)):
 async def update_display_name(data: UpdateDisplayName, user_id: str = Depends(get_current_user_id)):
     db = get_db()
     
+    # Check if display name is taken by another user
+    existing_user = await db.users.find_one({"display_name": data.display_name})
+    if existing_user and existing_user["id"] != user_id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Display name already taken"
+        )
+
     result = await db.users.update_one(
         {"id": user_id},
         {"$set": {"display_name": data.display_name}}
@@ -198,7 +215,7 @@ async def get_game_session(user_id: str = Depends(get_current_user_id)):
     
     # Get the most recent active game session
     session_dict = await db.game_sessions.find_one(
-        {"user_id": user_id, "game_status": "playing"},
+        {"user_id": user_id},
         sort=[("updated_at", -1)]
     )
     
@@ -435,12 +452,12 @@ async def get_preferences(user_id: str = Depends(get_current_user_id)):
         # Return default preferences
         return UserPreferences(
             user_id=user_id,
-            preferred_word_lengths=[5, 6, 7, 8]
+            preferred_word_lengths=[5]
         )
     
     return UserPreferences(
         user_id=prefs_dict["user_id"],
-        preferred_word_lengths=prefs_dict.get("preferred_word_lengths", [5, 6, 7, 8])
+        preferred_word_lengths=prefs_dict.get("preferred_word_lengths", [5])
     )
 
 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import Grid from './Grid';
 import Keyboard from './Keyboard';
 import { getRandomWord, isValidWord } from '@/lib/words';
@@ -15,7 +15,7 @@ import { useAuth } from '../../contexts/AuthContext';
 const API_URL = process.env.REACT_APP_BACKEND_URL;
 
 const GameContainerWithAuth = () => {
-  const { user, token, isAuthenticated } = useAuth();
+  const { user, token, isAuthenticated, loading } = useAuth();
   const navigate = useNavigate();
   const [wordLength, setWordLength] = useState(5);
   const [solution, setSolution] = useState('');
@@ -28,11 +28,13 @@ const GameContainerWithAuth = () => {
   const [stats, setStats] = useState({ played: 0, won: 0, streak: 0 });
   const [userStats, setUserStats] = useState(null);
   const [sessionLoaded, setSessionLoaded] = useState(false);
-  const [preferredLengths, setPreferredLengths] = useState([5, 6, 7, 8]);
+  const [preferredLengths, setPreferredLengths] = useState([5]);
   const [showLengthPopover, setShowLengthPopover] = useState(false);
 
   // Load saved session if authenticated
   useEffect(() => {
+    if (loading) return;
+
     if (isAuthenticated && !sessionLoaded) {
       loadPreferences();
       loadGameSession();
@@ -41,11 +43,39 @@ const GameContainerWithAuth = () => {
       startNewGame();
       setSessionLoaded(true);
     }
+  }, [isAuthenticated, loading]);
+
+  // Track latest state for save-on-unmount
+  const latestState = useRef({ guesses, currentGuess, gameStatus });
+
+  useEffect(() => {
+    latestState.current = { guesses, currentGuess, gameStatus };
+  }, [guesses, currentGuess, gameStatus]);
+
+  // Save current guess when it changes (debounced)
+  useEffect(() => {
+    if (!isAuthenticated || !sessionLoaded || gameStatus !== 'playing') return;
+
+    const timer = setTimeout(() => {
+      updateGameSession(guesses, currentGuess, gameStatus);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [currentGuess, isAuthenticated, sessionLoaded, gameStatus, guesses]);
+
+  // Save on unmount
+  useEffect(() => {
+    return () => {
+      const { guesses, currentGuess, gameStatus } = latestState.current;
+      if (isAuthenticated && gameStatus === 'playing') {
+        updateGameSession(guesses, currentGuess, gameStatus);
+      }
+    };
   }, [isAuthenticated]);
 
   const loadUserStats = async () => {
     if (!isAuthenticated) return;
-    
+
     try {
       const response = await fetch(`${API_URL}/api/profile`, {
         headers: {
@@ -64,7 +94,7 @@ const GameContainerWithAuth = () => {
 
   const loadPreferences = async () => {
     if (!isAuthenticated) return;
-    
+
     try {
       const response = await fetch(`${API_URL}/api/preferences`, {
         headers: {
@@ -74,7 +104,7 @@ const GameContainerWithAuth = () => {
 
       if (response.ok) {
         const data = await response.json();
-        setPreferredLengths(data.preferred_word_lengths || [5, 6, 7, 8]);
+        setPreferredLengths(data.preferred_word_lengths || [5]);
       }
     } catch (error) {
       console.error('Failed to load preferences:', error);
@@ -83,7 +113,7 @@ const GameContainerWithAuth = () => {
 
   const savePreferences = async (lengths) => {
     if (!isAuthenticated) return;
-    
+
     try {
       await fetch(`${API_URL}/api/preferences`, {
         method: 'PUT',
@@ -112,7 +142,7 @@ const GameContainerWithAuth = () => {
     } else {
       newLengths = [...preferredLengths, length].sort();
     }
-    
+
     setPreferredLengths(newLengths);
     savePreferences(newLengths);
     toast.success('Preferences saved');
@@ -136,6 +166,10 @@ const GameContainerWithAuth = () => {
           setCurrentGuess(session.current_guess || '');
           setGameStatus(session.game_status);
           console.log('Loaded saved session:', session);
+
+          if (['won', 'lost', 'abandoned'].includes(session.game_status)) {
+            setShowModal(true);
+          }
         } else {
           startNewGame();
         }
@@ -238,7 +272,7 @@ const GameContainerWithAuth = () => {
 
   const startNewGame = () => {
     // Select random length from preferred lengths
-    const availableLengths = preferredLengths.length > 0 ? preferredLengths : [5, 6, 7, 8];
+    const availableLengths = preferredLengths.length > 0 ? preferredLengths : [5];
     const newLength = availableLengths[Math.floor(Math.random() * availableLengths.length)];
     const newWord = getRandomWord(newLength);
     setWordLength(newLength);
@@ -293,7 +327,7 @@ const GameContainerWithAuth = () => {
         setStats(s => ({ ...s, played: s.played + 1, won: s.won + 1, streak: s.streak + 1 }));
         toast.success("Splendid! You found the word!", { duration: 3000 });
         setTimeout(() => setShowModal(true), 1500);
-        
+
         // Record completion
         if (isAuthenticated) {
           recordGameCompletion(true, newGuesses.length);
@@ -305,7 +339,7 @@ const GameContainerWithAuth = () => {
           setStats(s => ({ ...s, played: s.played + 1, streak: 0 }));
           toast.error(`Game Over! The word was ${solution}`);
           setTimeout(() => setShowModal(true), 1500);
-          
+
           // Record completion
           if (isAuthenticated) {
             recordGameCompletion(false, newGuesses.length);
@@ -343,8 +377,26 @@ const GameContainerWithAuth = () => {
     });
   });
 
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[50vh] space-y-4">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+        <p className="text-muted-foreground">Loading game data...</p>
+      </div>
+    );
+  }
+
+  if (!solution) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[50vh] space-y-4">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+        <p className="text-muted-foreground">Initializing game...</p>
+      </div>
+    );
+  }
+
   return (
-    <div className="flex flex-col h-full max-w-2xl mx-auto w-full">
+    <div className="flex flex-col flex-1 min-h-0 max-w-2xl mx-auto w-full">
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-10">
         <div className="flex items-center gap-2">
@@ -357,8 +409,8 @@ const GameContainerWithAuth = () => {
           {isAuthenticated ? (
             <Popover open={showLengthPopover} onOpenChange={setShowLengthPopover}>
               <PopoverTrigger asChild>
-                <Button 
-                  variant="ghost" 
+                <Button
+                  variant="ghost"
                   size="sm"
                   className="hidden sm:flex gap-1 px-3 py-1 h-8"
                 >
@@ -416,7 +468,7 @@ const GameContainerWithAuth = () => {
 
       {/* Game Area */}
       <div className="flex-1 overflow-y-auto py-4 min-h-0">
-        <Grid 
+        <Grid
           guesses={guesses}
           currentGuess={currentGuess}
           solution={solution}
@@ -438,12 +490,33 @@ const GameContainerWithAuth = () => {
               {gameStatus === 'won' ? '🎉 Victory!' : '😔 Game Over'}
             </DialogTitle>
             <DialogDescription className="text-center pt-2">
-              {gameStatus === 'won' 
-                ? `You found "${solution}" in ${guesses.length} guesses.` 
+              {gameStatus === 'won'
+                ? `You found "${solution}" in ${guesses.length} guesses.`
                 : `The word was "${solution}". Better luck next time!`}
             </DialogDescription>
           </DialogHeader>
-          
+
+          {isAuthenticated && userStats && (
+            <div className="grid grid-cols-3 gap-4 py-4">
+              <div className="text-center">
+                <div className="text-2xl font-bold">{userStats.games_played}</div>
+                <div className="text-xs text-muted-foreground">Played</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold">{userStats.current_streak}</div>
+                <div className="text-xs text-muted-foreground">Streak</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold">
+                  {userStats.games_played > 0
+                    ? Math.round((userStats.games_won / userStats.games_played) * 100)
+                    : 0}%
+                </div>
+                <div className="text-xs text-muted-foreground">Win %</div>
+              </div>
+            </div>
+          )}
+
           {!isAuthenticated && (
             <div className="py-4 px-6 bg-muted/50 rounded-lg text-center">
               <p className="text-sm text-muted-foreground mb-2">
@@ -478,7 +551,7 @@ const GameContainerWithAuth = () => {
               )}
             </DialogDescription>
           </DialogHeader>
-          
+
           {isAuthenticated && userStats && userStats.current_streak > 0 && gameStatus === 'playing' && guesses.length > 0 && (
             <div className="py-4 px-6 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 rounded-lg">
               <div className="text-center mb-2">
@@ -502,14 +575,14 @@ const GameContainerWithAuth = () => {
           )}
 
           <DialogFooter className="flex gap-2 sm:gap-2">
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               onClick={() => setShowNewGameConfirm(false)}
               className="flex-1"
             >
               Cancel
             </Button>
-            <Button 
+            <Button
               onClick={confirmNewGame}
               className="flex-1"
             >
