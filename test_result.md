@@ -300,10 +300,16 @@ metadata:
   test_sequence: 1
 
 test_plan:
-  current_focus: []
+  current_focus:
+    - "Authentication System"
+    - "Signup Flow"
+    - "Login Flow"
+    - "Profile Page"
+    - "Game Session Saving"
+    - "Guest Mode"
   stuck_tasks: []
   test_all: false
-  test_priority: "stuck_first"
+  test_priority: "high_first"
 
 agent_communication:
     - agent: "testing"
