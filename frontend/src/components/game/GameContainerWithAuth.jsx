@@ -350,7 +350,7 @@ const GameContainerWithAuth = () => {
           )}
 
           <DialogFooter className="sm:justify-center">
-            <Button onClick={() => { setShowModal(false); handleNewGameClick(); }} className="w-full sm:w-auto" size="lg">
+            <Button onClick={() => { setShowModal(false); startNewGame(); }} className="w-full sm:w-auto" size="lg">
               Play Again
             </Button>
           </DialogFooter>
