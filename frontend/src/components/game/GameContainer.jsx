@@ -45,6 +45,12 @@ const GameContainer = () => {
         setTimeout(() => setIsInvalidShake(false), 600);
         return;
       }
+      if (guesses.includes(currentGuess)) {
+        toast.warning("Already guessed");
+        setIsInvalidShake(true);
+        setTimeout(() => setIsInvalidShake(false), 600);
+        return;
+      }
       if (!isValidWord(currentGuess)) {
         toast.error("Not in word list");
         setIsInvalidShake(true);
