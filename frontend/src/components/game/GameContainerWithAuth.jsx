@@ -34,6 +34,7 @@ const GameContainerWithAuth = () => {
   // Load saved session if authenticated
   useEffect(() => {
     if (isAuthenticated && !sessionLoaded) {
+      loadPreferences();
       loadGameSession();
       loadUserStats();
     } else if (!isAuthenticated && !sessionLoaded) {
