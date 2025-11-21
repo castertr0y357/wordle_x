@@ -302,7 +302,7 @@ const GameContainerWithAuth = () => {
               Login
             </Button>
           )}
-          <Button variant="ghost" size="icon" onClick={startNewGame} title="New Game">
+          <Button variant="ghost" size="icon" onClick={handleNewGameClick} title="New Game">
             <RefreshCw className="w-5 h-5" />
           </Button>
         </div>
