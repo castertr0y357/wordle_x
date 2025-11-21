@@ -183,6 +183,21 @@ frontend:
           agent: "testing"
           comment: "All game features working: Backspace removes letters, Enter submits guesses, New Game button resets board with new random word length (5-8 letters), color coding shows correct/present/absent letters, toast notifications for feedback."
 
+  - task: "Duplicate Guess Prevention"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/components/game/GameContainer.jsx"
+    stuck_count: 1
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: "NA"
+          agent: "testing"
+          comment: "Testing duplicate guess prevention functionality as requested. Code exists in GameContainer.jsx lines 48-53 with proper logic: checks if guesses.includes(currentGuess), shows 'Already guessed' toast, prevents adding to grid. However, unable to complete testing due to word validation issues blocking valid word submissions."
+        - working: "NA"
+          agent: "testing"
+          comment: "❌ DUPLICATE PREVENTION TESTING BLOCKED: Cannot test duplicate guess prevention due to critical word validation issue. All test words (ACTION, ANIMAL, ORANGE, APPLE, WATER, COMPUTER, ABSOLUTE) from the game's word list are being rejected with 'Not in word list' error. The duplicate prevention code is implemented correctly in GameContainer.jsx (lines 48-53): if (guesses.includes(currentGuess)) { toast.warning('Already guessed'); return; }. Toast system works (shows validation errors). Game generates valid words internally. BLOCKER: Word validation must be fixed before duplicate prevention can be tested. Recommend investigating isValidWord() function in /app/frontend/src/lib/words.js."
+
 metadata:
   created_by: "testing_agent"
   version: "1.0"
