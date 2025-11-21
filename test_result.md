@@ -318,13 +318,7 @@ metadata:
   test_sequence: 1
 
 test_plan:
-  current_focus:
-    - "Authentication System"
-    - "Signup Flow"
-    - "Login Flow"
-    - "Profile Page"
-    - "Game Session Saving"
-    - "Guest Mode"
+  current_focus: []
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
