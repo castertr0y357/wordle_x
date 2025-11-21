@@ -237,7 +237,9 @@ const GameContainerWithAuth = () => {
   };
 
   const startNewGame = () => {
-    const newLength = Math.floor(Math.random() * (8 - 5 + 1)) + 5;
+    // Select random length from preferred lengths
+    const availableLengths = preferredLengths.length > 0 ? preferredLengths : [5, 6, 7, 8];
+    const newLength = availableLengths[Math.floor(Math.random() * availableLengths.length)];
     const newWord = getRandomWord(newLength);
     setWordLength(newLength);
     setSolution(newWord);
