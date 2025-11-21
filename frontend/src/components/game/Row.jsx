@@ -46,6 +46,13 @@ const Row = ({ guess, wordLength, solution, isCurrentRow, isCompleted, isInvalid
     statuses = checkGuess(guess, solution);
   }
 
+  // Adjust tile size for longer words to prevent overflow on smaller screens
+  // while maintaining the requested wider look on larger screens
+  const isLongWord = wordLength > 6;
+  const tileDimensions = isLongWord 
+    ? "w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14" 
+    : "w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16";
+
   for (let i = 0; i < wordLength; i++) {
     const letter = guess[i] || '';
     let status = null;
@@ -57,7 +64,7 @@ const Row = ({ guess, wordLength, solution, isCurrentRow, isCompleted, isInvalid
     }
 
     tiles.push(
-      <div key={i} className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16">
+      <div key={i} className={tileDimensions}>
         <Tile 
           letter={letter} 
           status={status} 
