@@ -213,8 +213,7 @@ test_plan:
   current_focus:
     - "Word Input and Validation"
     - "Duplicate Guess Prevention"
-  stuck_tasks: 
-    - "Word Input and Validation"
+  stuck_tasks: []
   test_all: false
   test_priority: "stuck_first"
 
