@@ -421,3 +421,64 @@ async def abandon_game(user_id: str = Depends(get_current_user_id)):
         return {"message": "Game abandoned", "stats": stats_dict}
     
     return {"message": "No active game to abandon"}
+
+
+# Preferences Routes
+@preferences_router.get("", response_model=UserPreferences)
+async def get_preferences(user_id: str = Depends(get_current_user_id)):
+    """Get user preferences"""
+    db = get_db()
+    
+    prefs_dict = await db.user_preferences.find_one({"user_id": user_id})
+    
+    if not prefs_dict:
+        # Return default preferences
+        return UserPreferences(
+            user_id=user_id,
+            preferred_word_lengths=[5, 6, 7, 8]
+        )
+    
+    return UserPreferences(
+        user_id=prefs_dict["user_id"],
+        preferred_word_lengths=prefs_dict.get("preferred_word_lengths", [5, 6, 7, 8])
+    )
+
+
+@preferences_router.put("", response_model=UserPreferences)
+async def update_preferences(
+    preferences: UpdatePreferences,
+    user_id: str = Depends(get_current_user_id)
+):
+    """Update user preferences"""
+    db = get_db()
+    
+    # Validate word lengths
+    valid_lengths = {5, 6, 7, 8}
+    if not all(length in valid_lengths for length in preferences.preferred_word_lengths):
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid word lengths. Must be 5, 6, 7, or 8."
+        )
+    
+    if len(preferences.preferred_word_lengths) == 0:
+        raise HTTPException(
+            status_code=400,
+            detail="Must select at least one word length."
+        )
+    
+    # Upsert preferences
+    await db.user_preferences.update_one(
+        {"user_id": user_id},
+        {
+            "$set": {
+                "user_id": user_id,
+                "preferred_word_lengths": preferences.preferred_word_lengths
+            }
+        },
+        upsert=True
+    )
+    
+    return UserPreferences(
+        user_id=user_id,
+        preferred_word_lengths=preferences.preferred_word_lengths
+    )
