@@ -9,7 +9,7 @@ import { toast } from "sonner";
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 
-const API_URL = import.meta.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL;
+const API_URL = process.env.REACT_APP_BACKEND_URL;
 
 const GameContainerWithAuth = () => {
   const { user, token, isAuthenticated } = useAuth();
