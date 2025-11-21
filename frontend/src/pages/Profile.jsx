@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { ArrowLeft, Edit2, Trophy, TrendingUp, Target } from 'lucide-react';
 import { toast } from "sonner";
 
-const API_URL = import.meta.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL;
+const API_URL = process.env.REACT_APP_BACKEND_URL;
 
 const Profile = () => {
   const { user, token, logout } = useAuth();
