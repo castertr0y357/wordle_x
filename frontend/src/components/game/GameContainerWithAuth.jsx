@@ -30,11 +30,31 @@ const GameContainerWithAuth = () => {
   useEffect(() => {
     if (isAuthenticated && !sessionLoaded) {
       loadGameSession();
+      loadUserStats();
     } else if (!isAuthenticated && !sessionLoaded) {
       startNewGame();
       setSessionLoaded(true);
     }
   }, [isAuthenticated]);
+
+  const loadUserStats = async () => {
+    if (!isAuthenticated) return;
+    
+    try {
+      const response = await fetch(`${API_URL}/api/profile`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setUserStats(data.stats);
+      }
+    } catch (error) {
+      console.error('Failed to load user stats:', error);
+    }
+  };
 
   const loadGameSession = async () => {
     try {
