@@ -147,6 +147,33 @@ const GameContainerWithAuth = () => {
     }
   };
 
+  const handleNewGameClick = () => {
+    // Show confirmation dialog
+    setShowNewGameConfirm(true);
+  };
+
+  const confirmNewGame = async () => {
+    // If authenticated and game is in progress with guesses, mark as abandoned
+    if (isAuthenticated && gameStatus === 'playing' && guesses.length > 0) {
+      try {
+        await fetch(`${API_URL}/api/game/abandon`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        // Reload stats to show updated streak
+        await loadUserStats();
+      } catch (error) {
+        console.error('Failed to abandon game:', error);
+      }
+    }
+
+    // Start new game
+    startNewGame();
+    setShowNewGameConfirm(false);
+  };
+
   const startNewGame = () => {
     const newLength = Math.floor(Math.random() * (8 - 5 + 1)) + 5;
     const newWord = getRandomWord(newLength);
