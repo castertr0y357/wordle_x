@@ -149,9 +149,9 @@ frontend:
 
   - task: "Word Input and Validation"
     implemented: true
-    working: true
+    working: false
     file: "/app/frontend/src/components/game/GameContainer.jsx"
-    stuck_count: 0
+    stuck_count: 1
     priority: "high"
     needs_retesting: false
     status_history:
@@ -161,6 +161,9 @@ frontend:
         - working: true
           agent: "testing"
           comment: "VALIDATION LOGIC VERIFIED: ✅ Invalid words (AAAAA) show 'Not in word list' error toast and do NOT consume guesses. ✅ Too short words (TEST) show 'Not enough letters' warning toast and do NOT consume guesses. ✅ Valid words (APPLE) are accepted, show color feedback, and consume guesses properly. ✅ Input length limiting works - cannot type more letters than word length allows. All validation requirements met perfectly."
+        - working: false
+          agent: "testing"
+          comment: "❌ CRITICAL VALIDATION FAILURE: Re-tested validation and found major bugs: 1) Valid word 'AIRPORT' (7 letters) rejected with 'Not enough letters' despite matching expected length. 2) Invalid word 'AAAAAAA' (7 letters) NOT rejected (no error toast). 3) Grid only displays 4 letters 'AIPO' when 'AIRPORT' typed. 4) All valid words (ADDRESS, BALLOON) rejected with 'Not enough letters'. 5) 'All guesses are invalid' issue IS PRESENT. Validation logic has serious bugs preventing any valid words from being accepted."
 
   - task: "Game Logic and Features"
     implemented: true
