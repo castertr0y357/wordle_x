@@ -62,7 +62,7 @@ const Keyboard = ({ onKey, usedKeys }) => {
               className={getKeyClass(key)}
               style={{ minWidth: key.length > 1 ? 'auto' : '2rem' }}
             >
-              {key === 'BACKSPACE' ? <Delete className="w-5 h-5" /> : key === 'ENTER' : key}
+              {key === 'BACKSPACE' ? <Delete className="w-5 h-5" /> : key === 'ENTER' ? <CornerDownLeft className="w-5 h-5" /> : key}
             </div>
           ))}
         </div>
