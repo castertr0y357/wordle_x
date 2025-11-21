@@ -28,6 +28,8 @@ const GameContainerWithAuth = () => {
   const [stats, setStats] = useState({ played: 0, won: 0, streak: 0 });
   const [userStats, setUserStats] = useState(null);
   const [sessionLoaded, setSessionLoaded] = useState(false);
+  const [preferredLengths, setPreferredLengths] = useState([5, 6, 7, 8]);
+  const [showLengthPopover, setShowLengthPopover] = useState(false);
 
   // Load saved session if authenticated
   useEffect(() => {
