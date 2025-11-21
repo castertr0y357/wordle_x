@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Delete, CornerDownLeft } from 'lucide-react';
 import { cn } from "@/lib/utils";
 
@@ -11,23 +11,30 @@ const Keyboard = ({ onKey, usedKeys }) => {
     ['ENTER', 'Z', 'X', 'C', 'V', 'B', 'N', 'M', 'BACKSPACE']
   ];
 
+  // Use a ref to hold the latest onKey function to avoid re-binding the event listener
+  const onKeyRef = useRef(onKey);
+
+  useEffect(() => {
+    onKeyRef.current = onKey;
+  }, [onKey]);
+
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.key === 'Enter') {
-        onKey('ENTER');
+        onKeyRef.current('ENTER');
       } else if (e.key === 'Backspace') {
-        onKey('BACKSPACE');
+        onKeyRef.current('BACKSPACE');
       } else {
         const key = e.key.toUpperCase();
         if (/^[A-Z]$/.test(key)) {
-          onKey(key);
+          onKeyRef.current(key);
         }
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [onKey]);
+  }, []); // Empty dependency array ensures listener is attached only once
 
   const getKeyClass = (key) => {
     const status = usedKeys[key];
@@ -55,7 +62,7 @@ const Keyboard = ({ onKey, usedKeys }) => {
               className={getKeyClass(key)}
               style={{ minWidth: key.length > 1 ? 'auto' : '2rem' }}
             >
-              {key === 'BACKSPACE' ? <Delete className="w-5 h-5" /> : key === 'ENTER' ? 'ENTER' : key}
+              {key === 'BACKSPACE' ? <Delete className="w-5 h-5" /> : key === 'ENTER' : key}
             </div>
           ))}
         </div>
