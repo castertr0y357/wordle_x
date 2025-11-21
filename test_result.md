@@ -178,7 +178,7 @@ metadata:
 
 test_plan:
   current_focus:
-    - "All Wordle game features tested and working"
+    - "Wordle layout changes testing completed successfully"
   stuck_tasks: []
   test_all: true
   test_priority: "high_first"
