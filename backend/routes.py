@@ -11,6 +11,7 @@ from auth import (
 )
 from datetime import datetime, timezone
 from typing import Optional
+from uuid import uuid4
 
 auth_router = APIRouter(prefix="/auth", tags=["auth"])
 profile_router = APIRouter(prefix="/profile", tags=["profile"])
