@@ -181,7 +181,7 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Wordle layout changes testing completed successfully"
+    - "Wordle validation logic testing completed successfully"
   stuck_tasks: []
   test_all: true
   test_priority: "high_first"
