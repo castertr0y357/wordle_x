@@ -228,10 +228,18 @@ export const getRandomWord = (length) => {
 };
 
 export const isValidWord = (word) => {
-  if (!word) return false;
+  if (!word) {
+    console.log('isValidWord: word is empty');
+    return false;
+  }
   const length = word.length;
   const list = WORDS[length];
-  if (!list) return false;
-  // Strict check: Word must be in the list
-  return list.includes(word.toUpperCase());
+  if (!list) {
+    console.log(`isValidWord: no list for length ${length}`);
+    return false;
+  }
+  const upperWord = word.toUpperCase();
+  const isValid = list.includes(upperWord);
+  console.log(`isValidWord: checking ${upperWord} (len ${length}) -> ${isValid}`);
+  return isValid;
 };
