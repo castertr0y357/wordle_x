@@ -149,11 +149,11 @@ frontend:
 
   - task: "Word Input and Validation"
     implemented: true
-    working: true
+    working: false
     file: "/app/frontend/src/components/game/GameContainer.jsx"
-    stuck_count: 1
+    stuck_count: 2
     priority: "high"
-    needs_retesting: false
+    needs_retesting: true
     status_history:
         - working: true
           agent: "testing"
@@ -167,6 +167,9 @@ frontend:
         - working: true
           agent: "testing"
           comment: "✅ VALIDATION ISSUES RESOLVED: Fixed Keyboard.jsx syntax error that was preventing game from loading. Comprehensive testing shows: 1) AIRPORT (7 letters) types correctly in grid and is ACCEPTED without error toast. 2) Invalid word AAAAA correctly shows 'Not in word list' error toast and is rejected. 3) All letters appear properly in grid when typing. 4) Input length limiting works correctly - only allows typing up to word length. 5) Virtual keyboard fully functional. 6) Color feedback works (yellow/gray tiles shown after valid guess). 7) Game mechanics working properly. The 'dropped keys' issue is resolved - all validation logic now working correctly."
+        - working: false
+          agent: "testing"
+          comment: "❌ DUPLICATE PREVENTION TESTING BLOCKED BY VALIDATION ISSUE: Attempted to test duplicate guess prevention but discovered word validation is broken again. Even words from the game's own word list (ACTION, ANIMAL, ORANGE, APPLE, WATER) are being rejected with 'Not in word list' error toast. Cannot test duplicate prevention functionality when no valid words can be submitted. The duplicate prevention code exists and looks correct in GameContainer.jsx lines 48-53. Game generates valid words in console (HEIGHT, ORANGE, DOMAIN) but user input validation fails. CRITICAL: Fix word validation logic before duplicate prevention can be properly tested."
 
   - task: "Game Logic and Features"
     implemented: true
