@@ -26,7 +26,7 @@ app = FastAPI()
 api_router = APIRouter(prefix="/api")
 
 # Import routes
-from routes import auth_router, profile_router, game_router
+from routes import auth_router, profile_router, game_router, preferences_router
 
 
 # Define Models
