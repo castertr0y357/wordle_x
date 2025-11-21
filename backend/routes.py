@@ -16,6 +16,7 @@ from uuid import uuid4
 auth_router = APIRouter(prefix="/auth", tags=["auth"])
 profile_router = APIRouter(prefix="/profile", tags=["profile"])
 game_router = APIRouter(prefix="/game", tags=["game"])
+preferences_router = APIRouter(prefix="/preferences", tags=["preferences"])
 
 
 # Helper function to get database (will be set up in main server.py)
