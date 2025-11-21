@@ -62,6 +62,62 @@ const GameContainerWithAuth = () => {
     }
   };
 
+  const loadPreferences = async () => {
+    if (!isAuthenticated) return;
+    
+    try {
+      const response = await fetch(`${API_URL}/api/preferences`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setPreferredLengths(data.preferred_word_lengths || [5, 6, 7, 8]);
+      }
+    } catch (error) {
+      console.error('Failed to load preferences:', error);
+    }
+  };
+
+  const savePreferences = async (lengths) => {
+    if (!isAuthenticated) return;
+    
+    try {
+      await fetch(`${API_URL}/api/preferences`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          preferred_word_lengths: lengths
+        })
+      });
+    } catch (error) {
+      console.error('Failed to save preferences:', error);
+    }
+  };
+
+  const toggleWordLength = (length) => {
+    let newLengths;
+    if (preferredLengths.includes(length)) {
+      // Don't allow removing if it's the last one
+      if (preferredLengths.length === 1) {
+        toast.warning('Must have at least one word length selected');
+        return;
+      }
+      newLengths = preferredLengths.filter(l => l !== length);
+    } else {
+      newLengths = [...preferredLengths, length].sort();
+    }
+    
+    setPreferredLengths(newLengths);
+    savePreferences(newLengths);
+    toast.success('Preferences saved');
+  };
+
   const loadGameSession = async () => {
     try {
       const response = await fetch(`${API_URL}/api/game/session`, {
