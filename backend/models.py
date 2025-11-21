@@ -92,3 +92,13 @@ class GameComplete(BaseModel):
     word_length: int
     won: bool
     num_guesses: int
+
+
+# Preferences Models
+class UserPreferences(BaseModel):
+    user_id: str
+    preferred_word_lengths: List[int] = Field(default_factory=lambda: [5, 6, 7, 8])
+
+
+class UpdatePreferences(BaseModel):
+    preferred_word_lengths: List[int]
