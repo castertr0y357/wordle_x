@@ -21,7 +21,9 @@ const GameContainerWithAuth = () => {
   const [gameStatus, setGameStatus] = useState('playing');
   const [isInvalidShake, setIsInvalidShake] = useState(false);
   const [showModal, setShowModal] = useState(false);
+  const [showNewGameConfirm, setShowNewGameConfirm] = useState(false);
   const [stats, setStats] = useState({ played: 0, won: 0, streak: 0 });
+  const [userStats, setUserStats] = useState(null);
   const [sessionLoaded, setSessionLoaded] = useState(false);
 
   // Load saved session if authenticated
