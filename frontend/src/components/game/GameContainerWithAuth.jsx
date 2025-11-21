@@ -356,6 +356,62 @@ const GameContainerWithAuth = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* New Game Confirmation Dialog */}
+      <Dialog open={showNewGameConfirm} onOpenChange={setShowNewGameConfirm}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-center text-2xl font-heading">
+              Start New Game?
+            </DialogTitle>
+            <DialogDescription className="text-center pt-2">
+              {gameStatus === 'playing' && guesses.length > 0 ? (
+                <span>Your current game progress will be lost.</span>
+              ) : (
+                <span>Ready to play a new round?</span>
+              )}
+            </DialogDescription>
+          </DialogHeader>
+          
+          {isAuthenticated && userStats && userStats.current_streak > 0 && gameStatus === 'playing' && guesses.length > 0 && (
+            <div className="py-4 px-6 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 rounded-lg">
+              <div className="text-center mb-2">
+                <div className="text-4xl font-bold text-amber-600 dark:text-amber-500">
+                  🔥 {userStats.current_streak}
+                </div>
+                <div className="text-sm font-medium text-amber-800 dark:text-amber-400">
+                  Current Win Streak
+                </div>
+              </div>
+              <p className="text-sm text-center text-amber-700 dark:text-amber-300 mt-2">
+                Starting a new game will count as a loss and reset your streak to 0.
+              </p>
+            </div>
+          )}
+
+          {isAuthenticated && gameStatus === 'playing' && guesses.length > 0 && (
+            <div className="text-sm text-center text-muted-foreground">
+              This will count as a game played.
+            </div>
+          )}
+
+          <DialogFooter className="flex gap-2 sm:gap-2">
+            <Button 
+              variant="outline" 
+              onClick={() => setShowNewGameConfirm(false)}
+              className="flex-1"
+            >
+              Cancel
+            </Button>
+            <Button 
+              onClick={confirmNewGame}
+              className="flex-1"
+            >
+              Start New Game
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
