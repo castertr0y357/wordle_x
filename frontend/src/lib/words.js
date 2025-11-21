@@ -228,23 +228,20 @@ export const getRandomWord = (length) => {
 };
 
 export const isValidWord = (word) => {
-  console.log('isValidWord called with:', word);
-  if (!word) {
-    console.log('isValidWord: no word provided, returning false');
-    return false;
-  }
+  if (!word || typeof word !== 'string') return false;
+  
   const length = word.length;
-  console.log('isValidWord: word length is', length);
   const list = WORDS[length];
-  if (!list) {
-    console.log('isValidWord: no list found for length', length);
+  
+  // Defensive check: ensure WORDS object and list are properly loaded
+  if (!list || !Array.isArray(list) || list.length === 0) {
+    console.error('isValidWord: WORDS list not properly loaded for length', length);
     return false;
   }
-  console.log('isValidWord: list has', list.length, 'words');
-  console.log('isValidWord: checking if list includes', word.toUpperCase());
-  const result = list.includes(word.toUpperCase());
-  console.log('isValidWord: result is', result);
-  console.log('isValidWord: first 10 words in list:', list.slice(0, 10));
-  // Strict check: Word must be in the list
-  return result;
+  
+  // Normalize and check
+  const normalizedWord = word.trim().toUpperCase();
+  const isValid = list.includes(normalizedWord);
+  
+  return isValid;
 };
