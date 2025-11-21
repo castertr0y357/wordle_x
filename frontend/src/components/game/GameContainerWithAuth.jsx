@@ -354,9 +354,51 @@ const GameContainerWithAuth = () => {
           <h1 className="text-xl font-heading font-bold tracking-tight">Wordle<span className="text-primary">X</span></h1>
         </div>
         <div className="flex items-center gap-2">
-          <div className="hidden sm:flex px-3 py-1 bg-muted rounded-full text-xs font-medium">
-            {wordLength} Letters
-          </div>
+          {isAuthenticated ? (
+            <Popover open={showLengthPopover} onOpenChange={setShowLengthPopover}>
+              <PopoverTrigger asChild>
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  className="hidden sm:flex gap-1 px-3 py-1 h-8"
+                >
+                  <span className="text-xs font-medium">{wordLength} Letters</span>
+                  <ChevronDown className="w-3 h-3" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-56" align="end">
+                <div className="space-y-4">
+                  <div>
+                    <h4 className="font-medium text-sm mb-3">Preferred Word Lengths</h4>
+                    <div className="space-y-3">
+                      {[5, 6, 7, 8].map((length) => (
+                        <div key={length} className="flex items-center space-x-2">
+                          <Checkbox
+                            id={`length-${length}`}
+                            checked={preferredLengths.includes(length)}
+                            onCheckedChange={() => toggleWordLength(length)}
+                          />
+                          <Label
+                            htmlFor={`length-${length}`}
+                            className="text-sm font-normal cursor-pointer"
+                          >
+                            {length} Letters
+                          </Label>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    New games will randomly select from your preferred lengths.
+                  </p>
+                </div>
+              </PopoverContent>
+            </Popover>
+          ) : (
+            <div className="hidden sm:flex px-3 py-1 bg-muted rounded-full text-xs font-medium">
+              {wordLength} Letters
+            </div>
+          )}
           {isAuthenticated ? (
             <Button variant="ghost" size="icon" onClick={() => navigate('/profile')} title="Profile">
               <User className="w-5 h-5" />
