@@ -228,6 +228,7 @@ export const getRandomWord = (length) => {
 };
 
 export const isValidWord = (word) => {
+  if (!word) return false;
   const length = word.length;
   const list = WORDS[length];
   if (!list) return false;
