@@ -369,3 +369,53 @@ async def complete_game(game_data: GameComplete, user_id: str = Depends(get_curr
     )
     
     return {"message": "Game completed successfully", "stats": stats_dict}
+
+
+@game_router.post("/abandon")
+async def abandon_game(user_id: str = Depends(get_current_user_id)):
+    """Called when user starts a new game while one is in progress"""
+    db = get_db()
+    
+    # Get current active session
+    session_dict = await db.game_sessions.find_one(
+        {"user_id": user_id, "game_status": "playing"}
+    )
+    
+    if session_dict and len(session_dict.get("guesses", [])) > 0:
+        # Only count as abandoned if they had made at least one guess
+        # Update user stats
+        stats_dict = await db.user_stats.find_one({"user_id": user_id})
+        
+        if not stats_dict:
+            # Create default stats
+            stats_dict = {
+                "user_id": user_id,
+                "games_played": 0,
+                "games_won": 0,
+                "current_streak": 0,
+                "highest_streak": 0,
+                "avg_guesses_by_length": {"5": 0.0, "6": 0.0, "7": 0.0, "8": 0.0},
+                "total_guesses_by_length": {"5": 0, "6": 0, "7": 0, "8": 0},
+                "games_by_length": {"5": 0, "6": 0, "7": 0, "8": 0}
+            }
+        
+        # Increment games played and reset streak (like a loss)
+        stats_dict["games_played"] = stats_dict.get("games_played", 0) + 1
+        stats_dict["current_streak"] = 0
+        
+        # Upsert stats
+        await db.user_stats.update_one(
+            {"user_id": user_id},
+            {"$set": stats_dict},
+            upsert=True
+        )
+        
+        # Mark the session as abandoned
+        await db.game_sessions.update_one(
+            {"id": session_dict["id"]},
+            {"$set": {"game_status": "abandoned"}}
+        )
+        
+        return {"message": "Game abandoned", "stats": stats_dict}
+    
+    return {"message": "No active game to abandon"}
