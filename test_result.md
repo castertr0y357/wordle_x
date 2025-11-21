@@ -205,10 +205,12 @@ metadata:
 
 test_plan:
   current_focus:
-    - "All Wordle features working correctly"
-  stuck_tasks: []
+    - "Word Input and Validation"
+    - "Duplicate Guess Prevention"
+  stuck_tasks: 
+    - "Word Input and Validation"
   test_all: false
-  test_priority: "high_first"
+  test_priority: "stuck_first"
 
 agent_communication:
     - agent: "testing"
