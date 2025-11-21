@@ -102,7 +102,7 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "Test the Wordle-style game implementation"
+user_problem_statement: "Comprehensive testing of the new authentication and user profile system for the Wordle game"
 
 frontend:
   - task: "Wordle Game Implementation"
