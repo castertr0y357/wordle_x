@@ -323,6 +323,30 @@ test_plan:
   test_all: false
   test_priority: "high_first"
 
+  - task: "Word Length Preference Selector"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/components/game/GameContainerWithAuth.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "🎉 WORD LENGTH PREFERENCE SELECTOR FULLY FUNCTIONAL: Comprehensive testing confirms all features working perfectly. ✅ Guest Users: Static word length display without dropdown arrow (correct behavior). ✅ Authenticated Users: Clickable selector with dropdown arrow opens popover with 4 checkboxes for lengths 5, 6, 7, 8. ✅ All checkboxes checked by default. ✅ Preferences can be changed with 'Preferences saved' toast notifications. ✅ Validation prevents unchecking all lengths with warning 'Must have at least one word length selected'. ✅ New games respect preferred lengths - when only length 6 was selected, all 5 new games generated 6-letter words. ✅ Popover UI is clean and functional with proper labels and help text. All requirements met perfectly."
+
+  - task: "New Game Confirmation Dialog"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/components/game/GameContainerWithAuth.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "🎉 NEW GAME CONFIRMATION DIALOG FULLY FUNCTIONAL: Comprehensive testing confirms all scenarios working correctly. ✅ Guest Users: Confirmation dialog appears when clicking New Game with progress, shows appropriate message, NO streak warning (correct). ✅ Authenticated Users: Confirmation dialog appears with proper messaging. ✅ Dialog includes Cancel and Start New Game buttons that work correctly. ✅ Cancel closes dialog without starting new game. ✅ Start New Game confirms and starts fresh game. ✅ Code analysis shows streak warning implementation with flame emoji 🔥 and reset warning for users with active streaks. ✅ 'This will count as a game played' message implemented for authenticated users with progress. ✅ Play Again after game completion bypasses confirmation (correct behavior per code review). All confirmation scenarios working as specified."
+
 agent_communication:
     - agent: "testing"
       message: "Fixed critical issue where App.js (template) was being loaded instead of App.jsx (Wordle game). Updated index.js import to specifically use App.jsx. All Wordle game features now working perfectly: game loads with grid, virtual keyboard functional, WordleX title present, typing updates grid, Enter submits guesses, Backspace removes letters, New Game resets board, dynamic word lengths, color coding, and input validation all working correctly."
@@ -346,3 +370,5 @@ agent_communication:
       message: "🎉 EXPANDED SCRABBLE DICTIONARY TESTING COMPLETE: Successfully tested the expanded dictionary containing ~75,000 Scrabble words. VERIFIED RESULTS: ✅ 5-letter expanded words: FJORD accepted (Nordic word, valid in Scrabble). ✅ 6-letter expanded words: ZEPHYR accepted (gentle breeze). ✅ 7-letter expanded words: QUIZZED accepted (past tense of quiz). ✅ Additional verified words: ADZES, QUARTZ all accepted from expanded dictionary. ✅ Invalid words still properly rejected (ZZZZZZ shows 'Not in word list'). ✅ Dictionary expansion from ~2,000 to ~75,000 words is working correctly. ✅ All test scenarios from request completed successfully. The expanded Scrabble dictionary is fully functional and significantly enhances the game's word variety while maintaining proper validation."
     - agent: "testing"
       message: "🎉 COMPREHENSIVE AUTHENTICATION SYSTEM TESTING COMPLETE: Successfully tested all authentication and user profile features for the Wordle game. CRITICAL BACKEND FIX: Resolved 404 errors on auth endpoints by fixing router inclusion order in server.py. All authentication features now fully functional. TESTING RESULTS: ✅ Signup Flow - Multiple successful signups with email, display name, password validation. Users redirected to game with profile button. ✅ Login Flow - Login page navigation, form submission, guest mode access all working. ✅ Profile Page - Complete profile with user info, statistics (games played, win rate, streak), average guesses by word length, edit display name, logout functionality. ✅ Game Session Saving - Authenticated users' game progress saved and restored. ✅ Guest Mode - Full game functionality without authentication, proper isolation from user features. ✅ Statistics Tracking - Game completion updates user stats correctly. All authentication scenarios tested successfully with no critical issues found."
+    - agent: "testing"
+      message: "🎉 NEW FEATURES TESTING COMPLETE: Successfully tested the new word length preference selector and new game confirmation features. COMPREHENSIVE RESULTS: ✅ Word Length Preference Selector: Guest users see static display (correct), authenticated users get clickable selector with popover containing 4 checkboxes for lengths 5-8, all checked by default, preferences save with toast notifications, validation prevents unchecking all with warning message, new games respect selected preferences (tested with 5 consecutive 6-letter games when only 6 was selected). ✅ New Game Confirmation Dialog: Appears for both guest and authenticated users when starting new game with progress, guest users see no streak warning (correct), authenticated users get proper confirmation with Cancel/Start buttons, streak warning implementation verified in code with flame emoji and reset warning. Both features working perfectly as specified in all test scenarios."
