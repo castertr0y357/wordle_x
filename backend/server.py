@@ -69,13 +69,13 @@ async def get_status_checks():
     
     return status_checks
 
-# Include the router in the main app
-app.include_router(api_router)
-
 # Include auth, profile, and game routers
 api_router.include_router(auth_router)
 api_router.include_router(profile_router)
 api_router.include_router(game_router)
+
+# Include the router in the main app
+app.include_router(api_router)
 
 app.add_middleware(
     CORSMiddleware,
