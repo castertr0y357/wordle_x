@@ -1,6 +1,9 @@
 # Wordle X
 
 A modern, full-stack Wordle game with user authentication, customizable word lengths, and persistent game sessions. Built with React, FastAPI, and MongoDB, fully containerized with Docker.
+This was built entirely with LLMs Claude Sonnet 4.5 and Google Gemini 3 Pro inside of Google Antigravity.  This is intended to be a personal project to see what the capabilities are of this tool, and is not intended to be something used for wide-spread use.  There is no warranty for this software, and it is provided as-is.
+
+That being said, if you want to clone this and tweak things yourself, you are free to do so.  Any publishing must reference back to me as the original creator.
 
 ## Features
 
