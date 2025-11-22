@@ -328,9 +328,12 @@ const GameContainerWithAuth = () => {
         toast.success("Splendid! You found the word!", { duration: 3000 });
         setTimeout(() => setShowModal(true), 1500);
 
-        // Record completion
+        // Record completion and reload stats
         if (isAuthenticated) {
-          recordGameCompletion(true, newGuesses.length);
+          (async () => {
+            await recordGameCompletion(true, newGuesses.length);
+            await loadUserStats();
+          })();
         }
       } else {
         const maxGuesses = wordLength > 6 ? 7 : 6;
@@ -340,9 +343,12 @@ const GameContainerWithAuth = () => {
           toast.error(`Game Over! The word was ${solution}`);
           setTimeout(() => setShowModal(true), 1500);
 
-          // Record completion
+          // Record completion and reload stats
           if (isAuthenticated) {
-            recordGameCompletion(false, newGuesses.length);
+            (async () => {
+              await recordGameCompletion(false, newGuesses.length);
+              await loadUserStats();
+            })();
           }
         } else {
           // Save progress
@@ -412,9 +418,9 @@ const GameContainerWithAuth = () => {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="hidden sm:flex gap-1 px-3 py-1 h-8"
+                  className="flex gap-1 px-3 py-1 h-8"
                 >
-                  <span className="text-xs font-medium">{wordLength} Letters</span>
+                  <span className="text-xs font-medium">{wordLength} <span className="hidden sm:inline">Letters</span></span>
                   <ChevronDown className="w-3 h-3" />
                 </Button>
               </PopoverTrigger>
@@ -447,8 +453,8 @@ const GameContainerWithAuth = () => {
               </PopoverContent>
             </Popover>
           ) : (
-            <div className="hidden sm:flex px-3 py-1 bg-muted rounded-full text-xs font-medium">
-              {wordLength} Letters
+            <div className="flex px-3 py-1 bg-muted rounded-full text-xs font-medium">
+              {wordLength} <span className="hidden sm:inline ml-1">Letters</span>
             </div>
           )}
           {isAuthenticated ? (
