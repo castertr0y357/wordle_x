@@ -23,9 +23,13 @@ A modern, full-stack Wordle game with authentication, customizable word lengths,
 - **Environment Externalization**:
   - Created `.env.example` containing configuration templates.
   - Initialized local `.env` with default ports and configurations.
-  - Refactored `docker-compose.yml` to interpolate variables from `.env` for:
-    - Backend environment variables (`MONGO_URL`, `DB_NAME`, `CORS_ORIGINS`).
-    - Frontend build args (`REACT_APP_BACKEND_URL`).
-    - Service port mappings (`BACKEND_PORT`, `FRONTEND_PORT`, `MONGO_PORT`).
-    - MongoDB image version tag (`MONGO_VERSION`).
-  - Verified configurations using `docker-compose config` command.
+  - Refactored `docker-compose.yml` to interpolate variables from `.env` for MongoDB, backend, and frontend ports.
+  - Verified configurations using `docker-compose config`.
+
+## Recent Changes (June 12, 2026)
+- **Project Standards Compliance Audit & Alignment**:
+  - **Setup & Portability**: Bootstrapped `JWT_SECRET_KEY` config variable. Added configuration validation checks and self-healing DB connection ping retries (with exponential backoff) on backend startup.
+  - **Database Indexing**: Configured automatic initialization of indexes for MongoDB collections (`users`, `user_stats`, `user_preferences`, and `game_sessions`).
+  - **Docker Security Enhancements**: Updated backend and frontend Docker configurations to execute as non-privileged users (`appuser` in backend and `nginxinc/nginx-unprivileged` in frontend).
+  - **UI Safeguards**: Implemented double-submit prevention and loading states on frontend Display Name, Change Password, and New Game modals.
+  - **Diagnostics & Data Safety Utilities**: Created `doctor.py` diagnostic verification script and `backup.py` database backup/restore tool. Updated `README.md` to document them.

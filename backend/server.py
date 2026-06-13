@@ -4,15 +4,30 @@ from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
 import os
 import logging
+import asyncio
+import sys
 from pathlib import Path
 from pydantic import BaseModel, Field, ConfigDict
 from typing import List
 import uuid
 from datetime import datetime, timezone
 
-
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
+
+# Configure logging first to capture startup events
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
+
+# Validate required configuration variables
+required_env_vars = ["MONGO_URL", "DB_NAME", "JWT_SECRET_KEY"]
+missing_vars = [var for var in required_env_vars if not os.environ.get(var)]
+if missing_vars:
+    logger.error(f"[Startup] - [Configuration] - Missing required environment variables: {', '.join(missing_vars)}")
+    sys.exit(1)
 
 # MongoDB connection
 mongo_url = os.environ['MONGO_URL']
@@ -86,12 +101,47 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
-logger = logging.getLogger(__name__)
+@app.on_event("startup")
+async def startup_db_check():
+    # 1. Self-healing pre-flight connection check with exponential backoff
+    retries = 5
+    delay = 1
+    connected = False
+    logger.info("[Startup] - [Database] - Initiating pre-flight connection check to MongoDB")
+    for i in range(retries):
+        try:
+            # Ping the database
+            await client.admin.command('ping')
+            connected = True
+            logger.info("[Startup] - [Database] - Pre-flight connection check successful")
+            break
+        except Exception as e:
+            logger.warning(f"[Startup] - [Database] - Connection failed, retrying in {delay}s: {e}")
+            await asyncio.sleep(delay)
+            delay *= 2
+    
+    if not connected:
+        logger.error("[Startup] - [Database] - Could not establish connection to MongoDB after retries. Exiting.")
+        sys.exit(1)
+        
+    # 2. Database Relationships & Indexing initialization
+    try:
+        logger.info("[Startup] - [Database] - Initializing database indexes")
+        # users: Unique index on email and id
+        await db.users.create_index("email", unique=True)
+        await db.users.create_index("id", unique=True)
+        
+        # user_stats: Unique index on user_id
+        await db.user_stats.create_index("user_id", unique=True)
+        
+        # user_preferences: Unique index on user_id
+        await db.user_preferences.create_index("user_id", unique=True)
+        
+        # game_sessions: Index on user_id
+        await db.game_sessions.create_index("user_id")
+        logger.info("[Startup] - [Database] - Database indexes initialized successfully")
+    except Exception as e:
+        logger.error(f"[Startup] - [Database] - Failed to initialize database indexes: {e}")
 
 @app.on_event("shutdown")
 async def shutdown_db_client():

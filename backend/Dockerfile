@@ -13,6 +13,10 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy the current directory contents into the container at /app
 COPY . .
 
+# Create a non-privileged user and adjust ownership
+RUN useradd -u 10001 -m appuser && chown -R appuser:appuser /app
+USER appuser
+
 # Make port 8000 available to the world outside this container
 EXPOSE 8000
 

@@ -25,6 +25,7 @@ const GameContainerWithAuth = () => {
   const [isInvalidShake, setIsInvalidShake] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [showNewGameConfirm, setShowNewGameConfirm] = useState(false);
+  const [confirmingNewGame, setConfirmingNewGame] = useState(false);
   const [stats, setStats] = useState({ played: 0, won: 0, streak: 0 });
   const [userStats, setUserStats] = useState(null);
   const [sessionLoaded, setSessionLoaded] = useState(false);
@@ -249,6 +250,7 @@ const GameContainerWithAuth = () => {
   };
 
   const confirmNewGame = async () => {
+    setConfirmingNewGame(true);
     // If authenticated and game is in progress with guesses, mark as abandoned
     if (isAuthenticated && gameStatus === 'playing' && guesses.length > 0) {
       try {
@@ -268,6 +270,7 @@ const GameContainerWithAuth = () => {
     // Start new game
     startNewGame();
     setShowNewGameConfirm(false);
+    setConfirmingNewGame(false);
   };
 
   const startNewGame = () => {
@@ -585,14 +588,16 @@ const GameContainerWithAuth = () => {
               variant="outline"
               onClick={() => setShowNewGameConfirm(false)}
               className="flex-1"
+              disabled={confirmingNewGame}
             >
               Cancel
             </Button>
             <Button
               onClick={confirmNewGame}
               className="flex-1"
+              disabled={confirmingNewGame}
             >
-              Start New Game
+              {confirmingNewGame ? 'Starting...' : 'Start New Game'}
             </Button>
           </DialogFooter>
         </DialogContent>

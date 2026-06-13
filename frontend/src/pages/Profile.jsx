@@ -20,6 +20,8 @@ const Profile = () => {
   // Edit modals
   const [showNameDialog, setShowNameDialog] = useState(false);
   const [showPasswordDialog, setShowPasswordDialog] = useState(false);
+  const [updatingName, setUpdatingName] = useState(false);
+  const [changingPassword, setChangingPassword] = useState(false);
   
   // Form states
   const [newDisplayName, setNewDisplayName] = useState('');
@@ -55,6 +57,7 @@ const Profile = () => {
   };
 
   const handleUpdateDisplayName = async () => {
+    setUpdatingName(true);
     try {
       const response = await fetch(`${API_URL}/api/profile/display-name`, {
         method: 'PUT',
@@ -75,6 +78,8 @@ const Profile = () => {
     } catch (error) {
       console.error('Failed to update display name:', error);
       toast.error('Failed to update display name');
+    } finally {
+      setUpdatingName(false);
     }
   };
 
@@ -89,6 +94,7 @@ const Profile = () => {
       return;
     }
 
+    setChangingPassword(true);
     try {
       const response = await fetch(`${API_URL}/api/profile/password`, {
         method: 'PUT',
@@ -115,6 +121,8 @@ const Profile = () => {
     } catch (error) {
       console.error('Failed to change password:', error);
       toast.error('Failed to change password');
+    } finally {
+      setChangingPassword(false);
     }
   };
 
@@ -286,15 +294,16 @@ const Profile = () => {
                 value={newDisplayName}
                 onChange={(e) => setNewDisplayName(e.target.value)}
                 placeholder="Your name"
+                disabled={updatingName}
               />
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowNameDialog(false)}>
+            <Button variant="outline" onClick={() => setShowNameDialog(false)} disabled={updatingName}>
               Cancel
             </Button>
-            <Button onClick={handleUpdateDisplayName}>
-              Save
+            <Button onClick={handleUpdateDisplayName} disabled={updatingName}>
+              {updatingName ? 'Saving...' : 'Save'}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -318,6 +327,7 @@ const Profile = () => {
                 value={currentPassword}
                 onChange={(e) => setCurrentPassword(e.target.value)}
                 placeholder="••••••••"
+                disabled={changingPassword}
               />
             </div>
             <div className="space-y-2">
@@ -328,6 +338,7 @@ const Profile = () => {
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
                 placeholder="••••••••"
+                disabled={changingPassword}
               />
             </div>
             <div className="space-y-2">
@@ -338,15 +349,16 @@ const Profile = () => {
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 placeholder="••••••••"
+                disabled={changingPassword}
               />
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowPasswordDialog(false)}>
+            <Button variant="outline" onClick={() => setShowPasswordDialog(false)} disabled={changingPassword}>
               Cancel
             </Button>
-            <Button onClick={handleChangePassword}>
-              Change Password
+            <Button onClick={handleChangePassword} disabled={changingPassword}>
+              {changingPassword ? 'Changing Password...' : 'Change Password'}
             </Button>
           </DialogFooter>
         </DialogContent>

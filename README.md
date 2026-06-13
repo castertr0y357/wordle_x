@@ -175,6 +175,26 @@ The application uses the following environment variables (configured in `docker-
 
 MongoDB is accessible on `localhost:27017` when containers are running.
 
+### Database Backup & Recovery
+
+The project includes a utility script to back up and restore database collections to/from compressed files:
+
+- **Back up the database**:
+  ```bash
+  python backup.py backup
+  ```
+- **Restore the database**:
+  ```bash
+  python backup.py restore backups/wordle_x_backup_[timestamp].json.gz
+  ```
+
+### Workspace Health Diagnostics
+
+Verify environment configurations, rules synchronization, and MongoDB connection status using the diagnostic doctor:
+```bash
+python doctor.py
+```
+
 ## Troubleshooting
 
 ### Container won't start

@@ -5,6 +5,9 @@ from passlib.context import CryptContext
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 import os
+import logging
+
+logger = logging.getLogger(__name__)
 
 # Password hashing
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -85,5 +88,6 @@ async def get_current_user_id_optional(credentials: Optional[HTTPAuthorizationCr
         
         user_id: str = payload.get("sub")
         return user_id
-    except:
+    except Exception as e:
+        logger.warning(f"[Authentication] - [Warning] - Optional user token validation failed: {e}")
         return None
