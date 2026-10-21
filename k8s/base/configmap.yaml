@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: wordle-x-config
+data:
+  MONGO_URL: "mongodb://mongo:27017"
+  DB_NAME: "wordle_x"
+  CORS_ORIGINS: "*"
