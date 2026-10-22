@@ -15,6 +15,25 @@ spec:
       labels:
         app.kubernetes.io/name: backend
     spec:
+      initContainers:
+        - name: wait-for-db
+          image: mongo:7.0
+          command:
+            - sh
+            - -c
+            - |
+              until mongosh --host mongo:27017 --eval "db.adminCommand('ping')" --quiet; do
+                echo "Waiting for MongoDB at mongo:27017 to be ready..."
+                sleep 2
+              done
+              echo "MongoDB is ready!"
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 256Mi
       containers:
         - name: backend
           image: ghcr.io/your-username/wordle-x-backend:latest

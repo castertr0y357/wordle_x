@@ -30,25 +30,31 @@ spec:
             exec:
               command:
                 - mongosh
-                - --eval
-                - "db.adminCommand('ping')"
-            initialDelaySeconds: 5
-            periodSeconds: 5
-          livenessProbe:
-            exec:
-              command:
-                - mongosh
+                - --quiet
                 - --eval
                 - "db.adminCommand('ping')"
             initialDelaySeconds: 15
             periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          livenessProbe:
+            exec:
+              command:
+                - mongosh
+                - --quiet
+                - --eval
+                - "db.adminCommand('ping')"
+            initialDelaySeconds: 30
+            periodSeconds: 15
+            timeoutSeconds: 5
+            failureThreshold: 3
           resources:
             requests:
               cpu: 100m
-              memory: 128Mi
+              memory: 256Mi
             limits:
               cpu: 1000m
-              memory: 512Mi
+              memory: 1024Mi
   volumeClaimTemplates:
     - metadata:
         name: mongo-data
