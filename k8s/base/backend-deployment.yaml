@@ -28,15 +28,21 @@ spec:
             - secretRef:
                 name: wordle-x-secret
           readinessProbe:
-            tcpSocket:
+            httpGet:
+              path: /readyz
               port: 8000
             initialDelaySeconds: 5
             periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
           livenessProbe:
-            tcpSocket:
+            httpGet:
+              path: /livez
               port: 8000
             initialDelaySeconds: 15
             periodSeconds: 20
+            timeoutSeconds: 3
+            failureThreshold: 3
           resources:
             requests:
               cpu: 100m

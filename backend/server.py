@@ -83,6 +83,13 @@ class RequestObservabilityMiddleware(BaseHTTPMiddleware):
 
 app.add_middleware(RequestObservabilityMiddleware)
 
+# Kubernetes Probes & Health Endpoints
+@app.get("/readyz")
+@app.get("/livez")
+@app.get("/healthz")
+async def health_check():
+    return Response(content="OK", media_type="text/plain")
+
 # Prometheus /metrics endpoint
 @app.get("/metrics")
 async def get_metrics():
