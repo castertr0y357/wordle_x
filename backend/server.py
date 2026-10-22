@@ -1,26 +1,21 @@
-from fastapi import FastAPI, APIRouter
+from fastapi import FastAPI, APIRouter, Request, Response
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
+from starlette.middleware.base import BaseHTTPMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
 import os
-import logging
 import asyncio
 import sys
+import time
 from pathlib import Path
 from pydantic import BaseModel, Field, ConfigDict
 from typing import List
 import uuid
 from datetime import datetime, timezone
+from observability import logger, metrics, set_debug_logging, is_debug_enabled
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
-
-# Configure logging first to capture startup events
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
-logger = logging.getLogger(__name__)
 
 # Validate required configuration variables
 required_env_vars = ["MONGO_URL", "DB_NAME", "JWT_SECRET_KEY"]
@@ -37,12 +32,83 @@ db = client[os.environ['DB_NAME']]
 # Create the main app without a prefix
 app = FastAPI()
 
+# HTTP Middleware for Correlation ID, Latency, and Prometheus Metrics
+class RequestObservabilityMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        correlation_id = request.headers.get("X-Correlation-ID") or uuid.uuid4().hex
+        request.state.correlation_id = correlation_id
+        start_time = time.perf_counter()
+        
+        try:
+            response = await call_next(request)
+            duration_ms = round((time.perf_counter() - start_time) * 1000, 2)
+            response.headers["X-Correlation-ID"] = correlation_id
+            
+            # Prometheus metrics tracking
+            metrics.record_request(request.method, request.url.path, response.status_code)
+            
+            # Structured action log
+            if not request.url.path.endswith("/metrics"):
+                logger.info(
+                    f"{request.method} {request.url.path} -> {response.status_code} ({duration_ms}ms)",
+                    extra={
+                        "correlation_id": correlation_id,
+                        "action": "http.request",
+                        "context": {
+                            "method": request.method,
+                            "path": request.url.path,
+                            "status_code": response.status_code,
+                            "duration_ms": duration_ms
+                        }
+                    }
+                )
+            return response
+        except Exception as exc:
+            duration_ms = round((time.perf_counter() - start_time) * 1000, 2)
+            metrics.record_request(request.method, request.url.path, 500)
+            logger.error(
+                f"{request.method} {request.url.path} -> 500 Uncaught Exception ({duration_ms}ms): {exc}",
+                exc_info=True,
+                extra={
+                    "correlation_id": correlation_id,
+                    "action": "http.error",
+                    "context": {
+                        "method": request.method,
+                        "path": request.url.path,
+                        "duration_ms": duration_ms
+                    }
+                }
+            )
+            raise
+
+app.add_middleware(RequestObservabilityMiddleware)
+
+# Prometheus /metrics endpoint
+@app.get("/metrics")
+async def get_metrics():
+    return Response(
+        content=metrics.generate_metrics(),
+        media_type="text/plain; version=0.0.4; charset=utf-8"
+    )
+
 # Create a router with the /api prefix
 api_router = APIRouter(prefix="/api")
 
+# Observability Debug Toggle endpoints
+class DebugToggleRequest(BaseModel):
+    enabled: bool
+
+@api_router.get("/observability/debug")
+async def get_debug_status():
+    return {"debug_enabled": is_debug_enabled()}
+
+@api_router.post("/observability/debug")
+async def toggle_debug_logging(req: DebugToggleRequest):
+    set_debug_logging(req.enabled)
+    return {"debug_enabled": is_debug_enabled(), "message": f"Debug logging set to {req.enabled}"}
+
 # Import routes
 from routes import auth_router, profile_router, game_router, preferences_router
-
 
 # Define Models
 class StatusCheck(BaseModel):
@@ -107,26 +173,26 @@ async def startup_db_check():
     retries = 5
     delay = 1
     connected = False
-    logger.info("[Startup] - [Database] - Initiating pre-flight connection check to MongoDB")
+    logger.info("[Startup] - [Database] - Initiating pre-flight connection check to MongoDB", extra={"action": "startup.database"})
     for i in range(retries):
         try:
             # Ping the database
             await client.admin.command('ping')
             connected = True
-            logger.info("[Startup] - [Database] - Pre-flight connection check successful")
+            logger.info("[Startup] - [Database] - Pre-flight connection check successful", extra={"action": "startup.database"})
             break
         except Exception as e:
-            logger.warning(f"[Startup] - [Database] - Connection failed, retrying in {delay}s: {e}")
+            logger.warning(f"[Startup] - [Database] - Connection failed, retrying in {delay}s: {e}", extra={"action": "startup.database"})
             await asyncio.sleep(delay)
             delay *= 2
     
     if not connected:
-        logger.error("[Startup] - [Database] - Could not establish connection to MongoDB after retries. Exiting.")
+        logger.error("[Startup] - [Database] - Could not establish connection to MongoDB after retries. Exiting.", extra={"action": "startup.database"})
         sys.exit(1)
         
     # 2. Database Relationships & Indexing initialization
     try:
-        logger.info("[Startup] - [Database] - Initializing database indexes")
+        logger.info("[Startup] - [Database] - Initializing database indexes", extra={"action": "startup.database"})
         # users: Unique index on email and id
         await db.users.create_index("email", unique=True)
         await db.users.create_index("id", unique=True)
@@ -139,10 +205,11 @@ async def startup_db_check():
         
         # game_sessions: Index on user_id
         await db.game_sessions.create_index("user_id")
-        logger.info("[Startup] - [Database] - Database indexes initialized successfully")
+        logger.info("[Startup] - [Database] - Database indexes initialized successfully", extra={"action": "startup.database"})
     except Exception as e:
-        logger.error(f"[Startup] - [Database] - Failed to initialize database indexes: {e}")
+        logger.error(f"[Startup] - [Database] - Failed to initialize database indexes: {e}", extra={"action": "startup.database"})
 
 @app.on_event("shutdown")
 async def shutdown_db_client():
+    logger.info("[Shutdown] - Closing MongoDB client connection", extra={"action": "shutdown.database"})
     client.close()
