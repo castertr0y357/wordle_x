@@ -8,8 +8,8 @@ resources:
 
 # Production image configuration
 images:
-  - name: ghcr.io/your-username/wordle-x-frontend
-    newName: ghcr.io/your-username/wordle-x-frontend
+  - name: ghcr.io/your-username/wordle-x-web
+    newName: ghcr.io/your-username/wordle-x-web
     newTag: latest
   - name: ghcr.io/your-username/wordle-x-backend
     newName: ghcr.io/your-username/wordle-x-backend
